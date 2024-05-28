@@ -1,17 +1,12 @@
-require("dotenv").config();
+import "dotenv/config"
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 
-const emailRegexPattern: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
-export interface ILiveCertificate {
-  courseId:string;
-  startDate:Date;
-  endDate:Date;
-}
 
 
 const userSchema = new mongoose.Schema(
@@ -97,9 +92,7 @@ userSchema.methods.SignRefreshToken = function () {
 };
 
 // compare password
-userSchema.methods.comparePassword = async function (
-  enteredPassword: string
-): Promise<boolean> {
+userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
