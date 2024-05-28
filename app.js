@@ -2,7 +2,7 @@ import express from "express";
 export const app=express();
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { rateLimit } from 'express-rate-limit'
+// import { rateLimit } from 'express-rate-limit'
 
 // body parser
 app.use(express.json({ limit: "50mb" }));
@@ -17,12 +17,12 @@ app.use(cors({
 }));
 
 // api requests limit
-const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
-	max: 100, 
-	standardHeaders: 'draft-7', 
-	legacyHeaders: false, 
-})
+// const limiter = rateLimit({
+// 	windowMs: 15 * 60 * 1000,
+// 	max: 100, 
+// 	standardHeaders: 'draft-7', 
+// 	legacyHeaders: false, 
+// })
 
 // testing api
 app.get("/test", (req ,res, next) => {
@@ -39,4 +39,4 @@ app.all("*", (req,res,next) => {
     next(err);
   });
   
-app.use(limiter)
+// app.use(limiter)
