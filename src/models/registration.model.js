@@ -2,11 +2,11 @@ import "dotenv/config";
 import mongoose from "mongoose";
 
 
+const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]$/;
 const phonerRegexPattern = /^\d{10}$/
 
-const applicationSchema = new mongoose.Schema({
+const registrationSchema = new mongoose.Schema({
     applicantName:{
         type: String,
         required: true,
@@ -40,7 +40,7 @@ const applicationSchema = new mongoose.Schema({
         required: true,
     },
     DOB: {
-        type: Date,
+        type: String,   //type Date
         required: true,
     },
     gender: {
@@ -129,4 +129,4 @@ const applicationSchema = new mongoose.Schema({
 );
 
 
-export const Application = mongoose.model("Application", applicationSchema)
+export const Registration = mongoose.model("Registration", registrationSchema)

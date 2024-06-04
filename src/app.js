@@ -4,17 +4,25 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 // import { rateLimit } from 'express-rate-limit'
 
-// body parser
-app.use(express.json({ limit: "50mb" }));
-
-// cookie parser
-app.use(cookieParser());
-
-// cors => cross origin resource sharing
 app.use(cors({
-  origin: ['http://localhost:3000'],
+  origin: process.env.CORS_ORIGIN,
   credentials: true
 }));
+
+app.use(express.json({limit: "16kb"}))
+app.use(express.urlencoded({extended: true, limit: "16kb"}))
+app.use(express.static("public"))
+app.use(cookieParser())
+
+
+// import routes
+import registerRouter from "./routes/registration.routes.js";
+
+
+
+// declare routes
+app.use("/api/v1/", registerRouter);
+
 
 // api requests limit
 // const limiter = rateLimit({
@@ -24,19 +32,6 @@ app.use(cors({
 // 	legacyHeaders: false, 
 // })
 
-// testing api
-app.get("/test", (req ,res, next) => {
-    res.status(200).json({
-      succcess: true,
-      message: "API is working",
-    });
-  });
-  
-// unknown route
-app.all("*", (req,res,next) => {
-    const err = new Error(`Route ${req.originalUrl} not found`) ;
-    err.statusCode = 404;
-    next(err);
-  });
-  
+
+
 // app.use(limiter)
