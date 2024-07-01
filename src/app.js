@@ -23,6 +23,17 @@ import registerRouter from "./routes/registration.routes.js";
 // declare routes
 app.use("/api/v1/", registerRouter);
 
+//admin routes
+import adminRouter from "./routes/admin.route.js"
+app.use("/api/admin", adminRouter);
+
+
+
+
+
+
+
+
 
 // api requests limit
 // const limiter = rateLimit({
