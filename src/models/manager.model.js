@@ -51,6 +51,9 @@ const managerSchema = Schema({
         public_id: String,
         url: String
     },
+    refreshToken: {
+      type: String,
+    }
 
 }, {timestamps: true})
 
@@ -65,7 +68,7 @@ managerSchema.pre("save", async function (next) {
   
   // sign access token
   managerSchema.methods.SignAccessToken = function () {
-    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || "", {
+    return jwt.sign({ id: this._id, username: this.username, managertype:  this.managertype }, process.env.ACCESS_TOKEN || "", {
       expiresIn: "5m",
     });
   };
