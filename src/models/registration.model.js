@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const phonerRegexPattern = /^\d{10}$/
+const phoneRegexPattern = /^\d{10}$/
 
 const registrationSchema = new mongoose.Schema({
     applicantName:{
@@ -23,14 +23,15 @@ const registrationSchema = new mongoose.Schema({
                 return emailRegexPattern.test(value);
             },
             message: "Please enter a valid E-mail."
-        }
+        },
+        lowercase: true
     },
     phone: {
         type: String,
         required: true,
         validate: {
             validator: function(value){
-                return phonerRegexPattern.test(value);
+                return phoneRegexPattern.test(value);
             },
             message: "Please enter a valid Phone Number."
         }
@@ -40,7 +41,7 @@ const registrationSchema = new mongoose.Schema({
         required: true,
     },
     DOB: {
-        type: String,   //type Date
+        type: Date,   //type Date
         required: true,
     },
     gender: {

@@ -12,13 +12,13 @@ app.listen(process.env.PORT, () => {
 
 
 
-// // testing api
-// app.get("/test", (req ,res, next) => {
-//     res.status(200).json({
-//       succcess: true,
-//       message: "API is working",
-//     });
-// });
+// testing api
+app.get("/test", (req ,res, next) => {
+    res.status(200).json({
+      succcess: true,
+      message: "API is working",
+    });
+});
   
 // unknown route
 app.all("*", (req,res,next) => {
