@@ -1,20 +1,31 @@
-import "dotenv/config";
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import bcrypt from bcryptjs;
+import jwt from jsonwebtoken;
 
 
 const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const phoneRegexPattern = /^\d{10}$/
 
-const registrationSchema = new mongoose.Schema({
-    applicantName:{
+const founderSchema = Schema({
+    name:{
         type: String,
         required: true,
     },
-    scheme: {        //for the scheme dropdown
+    username: {
+        type: String,
+        required: true,
+        lowercase: true,
+        unique: true
+    },
+    password:{
         type: String,
         required: true
     },
+    startups: [{
+        type: Schema.Types.ObjectId,
+        ref: "Startup"
+    }],
     email: {
         type: String,
         required: true,
@@ -24,7 +35,8 @@ const registrationSchema = new mongoose.Schema({
             },
             message: "Please enter a valid E-mail."
         },
-        lowercase: true
+        lowercase: true,
+        unique: true
     },
     phone: {
         type: String,
@@ -70,64 +82,39 @@ const registrationSchema = new mongoose.Schema({
         type: String,   //cloudinary
         required: true,
     },
-    ideaDescription: {
-        type: String,
-        required: true
-    },
-    conceptNote: {
-        type: String,   //cloudinary
-        required: true
-    },
-    aspectNote: {
-        type: String,  //cloudinary
-        required: true
-    },
-    previousRecipient: {
-        type: String,
-        required: true,
-        enum: {
-            values:["yes", "no"]
-        }
-    },
-    fullCommitment: {
-        type: String,
-        required: true,
-        enum: {
-            values:["yes", "no"]
-        }
-    },
-    noOtherFellowship: {
-        type: String,
-        required: true,
-        enum: {
-            values:["yes", "no"]
-        }
-    },
-    businessCommitment: {
-        type: String,
-        required: true,
-        enum: {
-            values:["yes", "no"]
-        }
-    },
-    noBeneficiary: {
-        type: String,
-        required: true,
-        enum: {
-            values:["yes", "no"]
-        }
-    },
-    registerPEP: {
-        type: String,
-        required: true,
-        enum: {
-            values:["yes", "no"]
-        }
-    },
-    
-},
-{timestamps: true}
-);
+    avatar: {
+        public_id: String,
+        url: String,   //cloudinary
+    }
+}, {timestamps: true})
+
+// Hash Password before saving
+founderSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) {
+      next();
+    }
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+});
+  
+// sign access token
+founderSchema.methods.SignAccessToken = function () {
+    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || "", {
+      expiresIn: "5m",
+    });
+};
+  
+// sign refresh token
+founderSchema.methods.SignRefreshToken = function () {
+    return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN || "", {
+      expiresIn: "3d",
+    });
+};
+
+// compare password
+founderSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 
 
-export const Registration = mongoose.model("Registration", registrationSchema)
+export const Founder = mongoose.model("Founder", founderSchema);

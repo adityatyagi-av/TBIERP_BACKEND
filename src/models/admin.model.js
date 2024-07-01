@@ -1,4 +1,4 @@
-import "dotenv/config"
+import "dotenv/config";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -6,25 +6,28 @@ import jwt from "jsonwebtoken";
 
 const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const phoneRegexPattern = /^\d{10}$/
 
 
-
-const userSchema = new mongoose.Schema(
+const adminSchema = new mongoose.Schema(
   {
-    name: {
+    username: {
       type: String,
-      required: [true, "Please enter your name"],
+      required: true,
+      lowercase: true,
+      unique: true
     },
     email: {
       type: String,
-      required: [true, "Please enter your email"],
+      required: true,
       validate: {
         validator: function (value) {
           return emailRegexPattern.test(value);
         },
-        message: "please enter a valid email",
+        message: "Please enter a valid email",
       },
       unique: true,
+      lowercase: true
     },
     password: {
       type: String,
@@ -35,32 +38,14 @@ const userSchema = new mongoose.Schema(
       public_id: String,
       url: String,
     },
-    role: {
-      type: String,
-      default: "user",
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
     phone:{
       type:String,
-    },
-    address:{
-      type:String,
-    },
-    pincode:{
-      type:String,
-    },
-    city:{
-      type:String,
-    },
-    state:{
-      type:String,
-
-    },
-    country:{
-      type:String,
+      validate: {
+        validartor: function(value) { 
+          return phoneRegexPattern.test(value);
+        }
+      },
+      required: true
     },
     
   },
@@ -69,7 +54,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash Password before saving
-userSchema.pre("save", async function (next) {
+adminSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();
   }
@@ -78,24 +63,24 @@ userSchema.pre("save", async function (next) {
 });
 
 // sign access token
-userSchema.methods.SignAccessToken = function () {
+adminSchema.methods.SignAccessToken = function () {
   return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || "", {
     expiresIn: "5m",
   });
 };
 
 // sign refresh token
-userSchema.methods.SignRefreshToken = function () {
+adminSchema.methods.SignRefreshToken = function () {
   return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN || "", {
     expiresIn: "3d",
   });
 };
 
 // compare password
-userSchema.methods.comparePassword = async function (enteredPassword) {
+adminSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const userModel = mongoose.model("User", userSchema);
+const Admin = mongoose.model("Admin", adminSchema);
 
-export default userModel;
+export default Admin;
