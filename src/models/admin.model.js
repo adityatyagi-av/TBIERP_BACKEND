@@ -67,14 +67,14 @@ adminSchema.pre("save", async function (next) {
 
 // sign access token
 adminSchema.methods.SignAccessToken = function () {
-  return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || "", {
+  return jwt.sign({ id: this._id, username: this.username }, process.env.ACCESS_TOKEN_SECRET || "", {
     expiresIn: "5m",
   });
 };
 
 // sign refresh token
 adminSchema.methods.SignRefreshToken = function () {
-  return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN || "", {
+  return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SECRET || "", {
     expiresIn: "3d",
   });
 };
