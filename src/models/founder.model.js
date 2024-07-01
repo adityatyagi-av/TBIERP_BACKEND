@@ -85,6 +85,9 @@ const founderSchema = Schema({
     avatar: {
         public_id: String,
         url: String,   //cloudinary
+    },
+    refreshToken: {
+        type: String
     }
 }, {timestamps: true})
 
