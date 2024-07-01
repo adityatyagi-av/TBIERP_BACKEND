@@ -21,13 +21,16 @@ import registerRouter from "./routes/registration.routes.js";
 
 
 // declare routes
-app.use("/api/v1/", registerRouter);
+app.use("/api/", registerRouter);
 
 //admin routes
-import adminRouter from "./routes/admin.route.js"
+import adminRouter from "./routes/admin.routes.js"
 app.use("/api/admin", adminRouter);
 
 
+//manager routes
+import managerRouter from "./routes/manager.routes.js"
+app.use("/api/manager", managerRouter)
 
 
 
@@ -35,14 +38,16 @@ app.use("/api/admin", adminRouter);
 
 
 
-// api requests limit
-// const limiter = rateLimit({
-// 	windowMs: 15 * 60 * 1000,
-// 	max: 100, 
-// 	standardHeaders: 'draft-7', 
-// 	legacyHeaders: false, 
-// })
+
+
+//api requests limit
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 100, 
+	standardHeaders: 'draft-7', 
+	legacyHeaders: false, 
+})
 
 
 
-// app.use(limiter)
+app.use(limiter)

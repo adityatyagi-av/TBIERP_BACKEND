@@ -102,14 +102,14 @@ founderSchema.pre("save", async function (next) {
   
 // sign access token
 founderSchema.methods.SignAccessToken = function () {
-    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || "", {
+    return jwt.sign({ id: this._id, username: this.username }, process.env.ACCESS_TOKEN_SECRET || "", {
       expiresIn: "5m",
     });
 };
   
 // sign refresh token
 founderSchema.methods.SignRefreshToken = function () {
-    return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN || "", {
+    return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SECRET || "", {
       expiresIn: "3d",
     });
 };

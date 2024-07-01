@@ -70,7 +70,7 @@ const logoutAdmin = asyncHandler(async(req,res) =>{
              req.user._id,
              {
                 $unset: {
-                    refreshToken: 1 // remove refresh token from db
+                    refreshToken: undefined // remove refresh token from db
                 }
              },
              {
@@ -101,17 +101,16 @@ const getAdminDetail = asyncHandler(async(req, res) => {
     .json(new ApiResponse(
         200,
         req.user,
-        "admin fetched successfully"
+        "Admin details fetched successfully"
     ))
 })
-
 
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
     if (!incomingRefreshToken) {
-        throw new ApiError(401, "unauthorized request")
+        throw new ApiError(401, "Unauthorized request")
     }
 
     try {
@@ -120,33 +119,35 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             process.env.REFRESH_TOKEN_SECRET
         )
     
-        const user = await Admin.findById(decodedToken?._id)
+        const admin = await Admin.findById(decodedToken?.id)
     
-        if (!user) {
+        if (!admin) {
             throw new ApiError(401, "Invalid refresh token")
         }
     
-        if (incomingRefreshToken !== user?.refreshToken) {
+        if (incomingRefreshToken !== admin?.refreshToken) {
             throw new ApiError(401, "Refresh token is expired or used")
             
         }
+
+
+        const { accessToken, refreshToken} = await generateAccessAndRefreshToken(admin.id)
     
         const options = {
             httpOnly: true,
             secure: true
         }
     
-        const {accessToken, newRefreshToken} = await generateAccessAndRefereshTokens(user._id)
     
         return res
         .status(200)
         .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
+        .cookie("refreshToken", refreshToken, options)
         .json(
             new ApiResponse(
                 200, 
                 {accessToken, refreshToken: newRefreshToken},
-                "Access token refreshed"
+                "Access token refreshed successfully"
             )
         )
     } catch (error) {
@@ -164,6 +165,5 @@ export {
     logoutAdmin,
     refreshAccessToken,
     getAdminDetail,
-
-
+    
 }
