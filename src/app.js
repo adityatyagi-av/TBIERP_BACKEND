@@ -2,7 +2,7 @@ import express from "express";
 export const app=express();
 import cookieParser from "cookie-parser";
 import cors from "cors";
-// import { rateLimit } from 'express-rate-limit'
+import { rateLimit } from 'express-rate-limit'
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN,
