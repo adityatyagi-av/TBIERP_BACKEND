@@ -1,12 +1,13 @@
 import { Admin } from "../models/admin.model.js";
 import { Founder } from "../models/founder.model.js";
 import { Manager } from "../models/manager.model.js";
-import { jwt } from jsonwebtoken;
+import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 
 
-const verifyJWT = asynHandler( async (req, _, next) => {
+const verifyJWT = asyncHandler( async (req, _, next) => {
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
 

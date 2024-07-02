@@ -9,7 +9,7 @@ const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegexPattern = /^\d{10}$/
 
 
-const adminSchema = new mongoose.Schema(
+const adminSchema =  mongoose.Schema(
   {
     username: {
       type: String,
@@ -41,7 +41,7 @@ const adminSchema = new mongoose.Schema(
     phone:{
       type:String,
       validate: {
-        validartor: function(value) { 
+        validator: function(value) { 
           return phoneRegexPattern.test(value);
         }
       },
@@ -84,6 +84,4 @@ adminSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const Admin = mongoose.model("Admin", adminSchema);
-
-export default Admin;
+export const Admin = mongoose.model("Admin", adminSchema);
