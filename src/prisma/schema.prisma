@@ -1,0 +1,52 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Registration {
+  id                Int      @id @default(autoincrement())
+  applicantName     String
+  scheme            String
+  email             String   @unique @db.VarChar(255)
+  phone             String   @db.VarChar(10)  // No regex here, handle validation in application logic
+  postalAddress     String
+  DOB               DateTime
+  gender            Gender   // Enum for gender
+  category          Category // Enum for category
+  education         String
+  experience        String
+  resume            String   // Cloudinary URL
+  ideaDescription   String
+  conceptNote       String   // Cloudinary URL
+  aspectNote        String   // Cloudinary URL
+  previousRecipient YesNo    // Enum for yes/no
+  fullCommitment    YesNo    // Enum for yes/no
+  noOtherFellowship YesNo    // Enum for yes/no
+  businessCommitment YesNo   // Enum for yes/no
+  noBeneficiary     YesNo    // Enum for yes/no
+  registerPEP       YesNo    // Enum for yes/no
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum Gender {
+  male
+  female
+  prefernottosay
+}
+
+enum Category {
+  general
+  obc
+  sc
+  st
+}
+
+enum YesNo {
+  yes
+  no
+}

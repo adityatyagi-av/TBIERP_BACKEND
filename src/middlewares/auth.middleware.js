@@ -21,25 +21,26 @@ const verifyJWT = asyncHandler( async (req, _, next) => {
             throw new ApiError(402, "Invalid Access Token");    
         }
 
-        const manager = await Manager.findById(decodedToken?.id).select("-password -refreshToken")
-        const admin = await Admin.findById(decodedToken?.id).select("-password -refreshToken")
-        const founder = await Founder.findById(decodedToken?.id).select("-password -refreshToken")
+        
 
         const baseUrl = req.baseUrl;
         
         
 
         if(baseUrl.contains("admin")){
+            const admin = await Admin.findById(decodedToken?.id).select("-password -refreshToken")
             if (!admin) {
                 throw new ApiError(401, "Invalid access token")
             }
             req.user = admin;
         } else if(baseUrl.contains("manager")){
+            const manager = await Manager.findById(decodedToken?.id).select("-password -refreshToken")
             if (!manager) {
                 throw new ApiError(401, "Invalid access token")
             }
             req.user = manager;
         } else if (baseUrl.contains("founder")){
+            const founder = await Founder.findById(decodedToken?.id).select("-password -refreshToken")
             if (!founder) {
                 throw new ApiError(401, "Invalid access token")
             }
