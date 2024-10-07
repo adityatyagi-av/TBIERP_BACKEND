@@ -19,18 +19,104 @@ model Registration {
   category          Category // Enum for category
   education         String
   experience        String
-  resume            String   // Cloudinary URL
+  resume            String   // S3 URL
   ideaDescription   String
-  conceptNote       String   // Cloudinary URL
-  aspectNote        String   // Cloudinary URL
-  previousRecipient YesNo    // Enum for yes/no
-  fullCommitment    YesNo    // Enum for yes/no
-  noOtherFellowship YesNo    // Enum for yes/no
-  businessCommitment YesNo   // Enum for yes/no
-  noBeneficiary     YesNo    // Enum for yes/no
-  registerPEP       YesNo    // Enum for yes/no
+  conceptNote       String   // S3 URL
+  aspectNote        String   // S3 URL
+  previousRecipient YesNo    @default("no")// Enum for yes/no
+  fullCommitment    YesNo    @default("no")// Enum for yes/no
+  noOtherFellowship YesNo    @default("no")// Enum for yes/no
+  businessCommitment YesNo   @default("no")// Enum for yes/no
+  noBeneficiary     YesNo    @default("no")// Enum for yes/no
+  registerPEP       YesNo    @default("no")// Enum for yes/no
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+
+model Scheme {
+  id             Int       @id @default(autoincrement())
+  shemeName      String    
+  startups       Startup[] @relation()
+  programManager Manager   @relation
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+
+model Founder {
+  id             Int        @id @default(autoincrement())
+  name           String
+  username       String     @unique
+  password       String
+  startups       Startup[]
+  email          String     @unique @db.VarChar(255)
+  phone          String     @db.VarChar(10)
+  postalAddress  String
+  DOB            DateTime
+  gender         Gender
+  category       Category
+  education      String
+  experience     String
+  resume         String
+  avatar         Avatar?
+  refreshToken   String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model Startup {
+  id                 Int              @id @default(autoincrement())
+  founder            Founder          @relation(fields:[founderId], references:[id])
+  founderId          Int              
+  teamMembers        TeamMember[]
+  scheme             Scheme
+  ideaDescription    String
+  conceptNote        String
+  aspectNote         String
+  previousRecipient  YesNo
+  fullCommitment     YesNo
+  noOtherFellowship  YesNo
+  businessCommitment YesNo
+  noBeneficiary      YesNo
+  registerPEP        YesNo
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model TeamMember {
+  id          Int       @id @default(autoincrement())
+  memberName  String    
+  startup     Startup   @relation(fields:[startupId], references:[id])
+  startupId   Int
+  memberEmail String    @unique @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Manager {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  managertype  ManagerType
+  password     String 
+  email        String   @unique @db.VarChar(255)
+  phone        String
+  avatar       Avatar?
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Avatar {
+  id        Int    @id @default(autoincrement())
+  publicId  String
+  url       String
+}
+
+enum ManagerType {
+  program_manager
+  incubation_manager
+  investment_manager
 }
 
 enum Gender {
