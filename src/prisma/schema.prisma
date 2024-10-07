@@ -8,39 +8,40 @@ generator client {
 }
 
 model Registration {
-  id                Int      @id @default(autoincrement())
-  applicantName     String
-  scheme            String
-  email             String   @unique @db.VarChar(255)
-  phone             String   @db.VarChar(10)  // No regex here, handle validation in application logic
-  postalAddress     String
-  DOB               DateTime
-  gender            Gender   // Enum for gender
-  category          Category // Enum for category
-  education         String
-  experience        String
-  resume            String   // S3 URL
-  ideaDescription   String
-  conceptNote       String   // S3 URL
-  aspectNote        String   // S3 URL
-  previousRecipient YesNo    @default("no")// Enum for yes/no
-  fullCommitment    YesNo    @default("no")// Enum for yes/no
-  noOtherFellowship YesNo    @default("no")// Enum for yes/no
-  businessCommitment YesNo   @default("no")// Enum for yes/no
-  noBeneficiary     YesNo    @default("no")// Enum for yes/no
-  registerPEP       YesNo    @default("no")// Enum for yes/no
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  applicantName      String
+  scheme             String
+  email              String   @unique @db.VarChar(255)
+  phone              String   @db.VarChar(10)  // No regex here, handle validation in application logic
+  postalAddress      String
+  DOB                DateTime
+  gender             Gender   // Enum for gender
+  category           Category // Enum for category
+  education          String
+  experience         String
+  resume             String   // S3 URL
+  ideaDescription    String
+  conceptNote        String   // S3 URL
+  aspectNote         String   // S3 URL
+  previousRecipient  YesNo    // Enum for yes/no
+  fullCommitment     YesNo    // Enum for yes/no
+  noOtherFellowship  YesNo    // Enum for yes/no
+  businessCommitment YesNo   // Enum for yes/no
+  noBeneficiary      YesNo    // Enum for yes/no
+  registerPEP        YesNo    // Enum for yes/no
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 
 model Scheme {
-  id             Int       @id @default(autoincrement())
-  shemeName      String    
-  startups       Startup[] @relation()
-  programManager Manager   @relation
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id               Int       @id @default(autoincrement())
+  shemeName        String    
+  startups         Startup[]
+  programManager   Manager   @relation(fields:[programManagerId], references:[id])
+  programManagerId Int
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 
@@ -59,7 +60,7 @@ model Founder {
   education      String
   experience     String
   resume         String
-  avatar         Avatar?
+  avatar         String
   refreshToken   String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
@@ -70,7 +71,8 @@ model Startup {
   founder            Founder          @relation(fields:[founderId], references:[id])
   founderId          Int              
   teamMembers        TeamMember[]
-  scheme             Scheme
+  scheme             Scheme           @relation(fields:[schemeId], references:[id])
+  schemeId           Int
   ideaDescription    String
   conceptNote        String
   aspectNote         String
@@ -95,23 +97,21 @@ model TeamMember {
 }
 
 model Manager {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
+  id           Int         @id @default(autoincrement())
+  username     String      @unique
   managertype  ManagerType
   password     String 
-  email        String   @unique @db.VarChar(255)
+  email        String      @unique @db.VarChar(255)
   phone        String
-  avatar       Avatar?
+  scheme       Scheme[]
+  avatar       String
+  avatarId     Int?
   refreshToken String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
-model Avatar {
-  id        Int    @id @default(autoincrement())
-  publicId  String
-  url       String
-}
+
 
 enum ManagerType {
   program_manager
