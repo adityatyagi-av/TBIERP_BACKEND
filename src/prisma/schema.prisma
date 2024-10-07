@@ -8,11 +8,12 @@ generator client {
 }
 
 model Registration {
-  id                 Int      @id @default(autoincrement())
+  id                 Int        @id @default(autoincrement())
   applicantName      String
-  scheme             String
-  email              String   @unique @db.VarChar(255)
-  phone              String   @db.VarChar(10)  // No regex here, handle validation in application logic
+  scheme             Scheme     @relation(fields: [schemeId], references: [id])
+  schemeId           Int
+  email              String     @unique @db.VarChar(255)
+  phone              String     @db.VarChar(10)  // No regex here, handle validation in application logic
   postalAddress      String
   DOB                DateTime
   gender             Gender   // Enum for gender
@@ -26,22 +27,24 @@ model Registration {
   previousRecipient  YesNo    // Enum for yes/no
   fullCommitment     YesNo    // Enum for yes/no
   noOtherFellowship  YesNo    // Enum for yes/no
-  businessCommitment YesNo   // Enum for yes/no
+  businessCommitment YesNo    // Enum for yes/no
   noBeneficiary      YesNo    // Enum for yes/no
   registerPEP        YesNo    // Enum for yes/no
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  evaluation         Evaluation? @relation
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 }
 
 
 model Scheme {
-  id               Int       @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   shemeName        String    
   startups         Startup[]
-  programManager   Manager   @relation(fields:[programManagerId], references:[id])
+  registrations    Registration[]
+  programManager   Manager      @relation(fields:[programManagerId], references:[id])
   programManagerId Int
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 }
 
 
@@ -105,12 +108,74 @@ model Manager {
   phone        String
   scheme       Scheme[]
   avatar       String
+  panelMember  PanelMember?
   avatarId     Int?
   refreshToken String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
 
+model Evaluation {
+  id                Int              @id @default(autoincrement())
+  registration      Registration     @relation(fields:[registrationId], references: [id])
+  registrationId    Int              @unique
+  panel             Panel            @relation(fields: [panelId], references: [id])
+  panelId           Int              @unique
+  evaluationSheet   EvaluationSheet  @relation(fields: [evaluationSheetId], references: [id])
+  evaluationSheetId Int              @unique
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+model Panel{
+  id           Int           @id @default(autoincrement())
+  panelMembers PanelMember[] 
+  evaluation   Evaluation?   @relation
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model PanelMember{
+  id           Int         @id @default(autoincrement())
+  panel        Panel       @relation(fields:[panelId], references:[id])
+  panelId      Int
+  memberType   MemberType
+  manager      Manager?    @relation(fields: [managerId], references: [id])
+  managerId    Int?        @unique
+  guest        Guest?      @relation(fields: [guestId], references: [id])
+  guestId      Int?        @unique
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model EvaluationSheet{
+  id              Int              @id @default(autoincrement())
+  evaluation      Evaluation?      @relation
+  questions       Question[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Question{
+  id                Int             @id @default(autoincrement())
+  questionText      String
+  evaluatedMarks    String
+  options           String[]
+  evaluationSheet   EvaluationSheet @relation(fields: [evaluationSheetId], references: [id])
+  evaluationSheetId Int
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Guest{
+  id           Int         @id @default(autoincrement())
+  name         String
+  email        String      @unique @db.VarChar(255)
+  panelMember  PanelMember?
+  phone        String      @db.VarChar(10)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
 
 
 enum ManagerType {
@@ -135,4 +200,9 @@ enum Category {
 enum YesNo {
   yes
   no
+}
+
+enum MemberType {
+  Manager
+  Guest
 }

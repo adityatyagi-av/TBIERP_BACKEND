@@ -16,7 +16,7 @@ const evaluationSchema = Schema({
         type: Schema.Types.ObjectId,
         ref:"Panel" 
     },
-    evaluatiohSheet: {
+    evaluationSheet: {
         type: Schema.Types.ObjectId,
         ref: "EvaluationSheet"
     }
