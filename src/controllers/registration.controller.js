@@ -1,4 +1,4 @@
-import prisma from "../models/prismaClient.js";
+import { extendedclient } from "../models/prismaClient.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
@@ -65,13 +65,13 @@ const registerApplicant = asyncHandler(async (req, res, next) => {
     throw new ApiError(400, "Aspect Note is required.");
   }
 
-  // Upload files to Cloudinary
-  const resume = await uploadOnCloudinary(resumeLocalPath);
-  const conceptNote = await uploadOnCloudinary(conceptNoteLocalPath);
-  const aspectNote = await uploadOnCloudinary(aspectNoteLocalPath);
+  // // Upload files to Cloudinary
+  // const resume = await uploadOnCloudinary(resumeLocalPath);
+  // const conceptNote = await uploadOnCloudinary(conceptNoteLocalPath);
+  // const aspectNote = await uploadOnCloudinary(aspectNoteLocalPath);
 
   // Create the registration record using Prisma
-  const registration = await prisma.registration.create({
+  const registration = await extendedclient.registration.create({
     data: {
       applicantName,
       scheme,
@@ -83,10 +83,10 @@ const registerApplicant = asyncHandler(async (req, res, next) => {
       category,
       education,
       experience,
-      resume: resume.url || "",
+      resume: "u1",
       ideaDescription,
-      conceptNote: conceptNote.url || "",
-      aspectNote: aspectNote.url || "",
+      conceptNote: "u2",
+      aspectNote:  "u3",
       previousRecipient,
       fullCommitment,
       noOtherFellowship,
@@ -97,7 +97,7 @@ const registerApplicant = asyncHandler(async (req, res, next) => {
   });
 
   // Fetch the newly created registration
-  const createdRegistration = await prisma.registration.findUnique({
+  const createdRegistration = await extendedclient.registration.findUnique({
     where: { id: registration.id },
   });
 

@@ -7,6 +7,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Admin {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  email        String   @unique @db.VarChar(255)
+  password     String
+  avatar       String?
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model Registration {
   id                 Int         @id @default(autoincrement())
   applicantName      String
@@ -37,7 +48,7 @@ model Registration {
 
 model Scheme {
   id               Int            @id @default(autoincrement())
-  schemeName       String
+  schemeName       String         @unique
   startups         Startup[]      @relation
   registrations    Registration[] @relation
   programManager   Manager?       @relation(fields: [programManagerId], references: [id])
@@ -63,7 +74,6 @@ model Founder {
   resume        String?
   avatar        String?
   refreshToken  String?
-  accessToken   String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -110,7 +120,6 @@ model Manager {
   panelMember  PanelMember? @relation
   avatarId     Int?
   refreshToken String?
-  accessToken  String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }

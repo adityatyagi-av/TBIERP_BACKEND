@@ -1,21 +1,24 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^[0-9]{10}$/;
 const fieldextensions = {
     field: {
         email: {
-            validate: (email) => {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return emailRegex.test(email);
+            set(value) {
+                console.log("Inside Email validation");
+                if (!emailRegex.test(value)) {
+                    throw new Error('Invalid email format');
+                }
+                return value;
             },
-            message: "Invalid email format."
         },
         phone: {
-            validate: (phone) => {
-                const phoneRegex = /^[0-9]{10}$/;
-                return phoneRegex.test(phone);
+            set(value) {
+                console.log("Inside Phone validation");
+                if (!phoneRegex.test(value)) {
+                    throw new Error('Invalid phone number');
+                }
+                return value;
             },
-            message: "Phone number must be 10 digits."
         },
         
     }

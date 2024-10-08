@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import modelextensions from "./extensions/modelextensions";
-import clientextensions from "./extensions/clientextensions";
-import fieldextensions from "./extensions/fieldextensions";
+import modelextensions from "./extensions/modelextensions.js";
+import clientextensions from "./extensions/clientextensions.js";
+import fieldextensions from "./extensions/fieldextensions.js";
 
 const prisma = new PrismaClient();
 
@@ -18,4 +18,4 @@ const extendedclient = prisma.$extends({
     },
 });
 
-export default extendedclient;
+export  {prisma, extendedclient};

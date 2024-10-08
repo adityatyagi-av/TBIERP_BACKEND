@@ -1,6 +1,4 @@
-import { Admin } from "../models/admin.model.js";
-import { Founder } from "../models/founder.model.js";
-import { Manager } from "../models/manager.model.js";
+import prisma from "../models/prismaClient.js"
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -28,23 +26,26 @@ const verifyJWT = asyncHandler( async (req, _, next) => {
         
 
         if(baseUrl.contains("admin")){
-            const admin = await Admin.findById(decodedToken?.id).select("-password -refreshToken")
+            const id = decodedToken.id;
+            const admin = await prisma.admin.findUnique({where:{id}, select:{id:true, username:true}})
             if (!admin) {
                 throw new ApiError(401, "Invalid access token")
             }
             req.user = admin;
         } else if(baseUrl.contains("manager")){
-            const manager = await Manager.findById(decodedToken?.id).select("-password -refreshToken")
+            const id = decodedToken.id;
+            const admin = await prisma.admin.findUnique({where:{id}, select:{id:true, username:true}})
             if (!manager) {
                 throw new ApiError(401, "Invalid access token")
             }
             req.user = manager;
         } else if (baseUrl.contains("founder")){
-            const founder = await Founder.findById(decodedToken?.id).select("-password -refreshToken")
-            if (!founder) {
+            const id = decodedToken.id;
+            const admin = await prisma.admin.findUnique({where:{id}, select:{id:true, username:true, managertype: true}})
+            if (!admin) {
                 throw new ApiError(401, "Invalid access token")
             }
-            req.user = founder;
+            req.user = admin;
         }
         
 
