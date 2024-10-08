@@ -1,166 +1,155 @@
-// import "dotenv/config";
-// import { asyncHandler } from "../utils/asyncHandler.js";
-// import { ApiError } from "../utils/ApiError.js";
-// import { ApiResponse } from "../utils/ApiResponse.js";
-// import jwt from "jsonwebtoken";
-// import prisma from "../models/prismaClient.js";
+import "dotenv/config";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
+import prisma from "../models/prismaClient.js";
 
+const generateAccessAndRefreshToken = async (managerId) => {
+    try {
+        const manager = await prisma.manager.findUnique({
+            where: { id: managerId },
+        });
 
-// const generateAccessAndRefreshToken = async (ManagerId) => {
-//     try {
-//         const manager = await Manager.findById(ManagerId);
-    
-//         const accessToken = manager.SignAccessToken();
-    
-//         const refreshToken = manager.SignRefreshToken();
-    
-//         manager.refreshToken = refreshToken;
-    
-//         await manager.save({validateBeforeSave: false})
-    
-//         return {accessToken, refreshToken}
-//     } catch (error) {
-//         throw new ApiError(500, "Something went wrong while generating access and refresh tokens");
-//     }
+        if (!manager) throw new ApiError(404, "Manager not found");
 
-// }
+        const accessToken = manager.SignAccessToken();
+        const refreshToken = manager.SignRefreshToken();
 
-// const loginManager = asyncHandler( async (req, res) => {
-//     const {username, password} = req.body;
+        await prisma.manager.update({
+            where: { id: managerId },
+            data: { refreshToken },
+        });
 
-//     if(!username || !password) {
-//         throw new ApiError(400, "Username and Password is required")
-//     }
+        return { accessToken, refreshToken };
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating access and refresh tokens");
+    }
+};
 
-//     const manager = await Manager.findOne({username});
+const loginManager = asyncHandler(async (req, res) => {
+    const { username, password } = req.body;
 
-//     if(!manager) {
-//         throw new ApiError(400, "Invalid username and password")
-//     }
+    if (!username || !password) {
+        throw new ApiError(400, "Username and Password are required");
+    }
 
-//     const isPasswordCorrect = await manager.comparepassword(password);
+    const manager = await prisma.manager.findUnique({ where: { username } });
 
-//     if (!isPasswordCorrect) {
-//         throw new ApiError(400, "Invalid Password")
-//     }
+    if (!manager) {
+        throw new ApiError(400, "Invalid username and password");
+    }
 
-//     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(manager._id)
+    const isPasswordCorrect = await manager.comparePassword(password);
 
-//     const loggedInManager = await Manager.findById(manager._id).select("-password -refreshToken")
+    if (!isPasswordCorrect) {
+        throw new ApiError(400, "Invalid Password");
+    }
 
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(manager.id);
 
-//     const options = {
-//         httpOnly: true,
-//         secure: true
-//     }
+    const loggedInManager = await prisma.manager.findUnique({
+        where: { id: manager.id },
+        select: {
+            id: true,
+            username: true,
+            email: true,
+            phone: true,
+            avatar: true,
+            
+        },
+    });
 
-//     return res
-//     .status(200)
-//     .cookie("accessToken", accessToken, options)
-//     .cookie("refreshToken", refreshToken, options)
-//     .json(
-//         new ApiResponse(200, loggedInManager, "Manager successfully logged in.")
-//     )
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
 
-// })
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(200, loggedInManager, "Manager successfully logged in."));
+});
 
+const logoutManager = asyncHandler(async (req, res) => {
+    await prisma.manager.update({
+        where: { id: req.user?.id },
+        data: { refreshToken: null },
+    });
 
-// const logoutManager = asyncHandler( async (req, res) => {
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
 
-//     await Manager.findByIdAndUpdate(
-//         req.user?._id,
-//         {
-//             $set: {
-//                 refreshToken: undefined
-//             }
-//         },
-//         {
-//             new: true
-//         })
-    
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
 
-//     const options = {
-//         httpOnly: true,
-//         secure: true
-//     }
+const getManagerDetail = asyncHandler(async (req, res) => {
+    return res
+        .status(200)
+        .json(new ApiResponse(200, req.user, "Manager data fetched successfully"));
+});
 
-//     return res
-//     .status(200)
-//     .clearCookie("accessToken", options)
-//     .clearCookie("refreshToken", options)
-//     .json(
-//         new ApiResponse(200, {}, "User logged out successfully")
-//     )
-// })
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
 
-// const getManagerDetail = asyncHandler( async (req, res) => {
-//     return res
-//     .status(200)
-//     .json(
-//         new ApiResponse(200, req.user, "Manager data fetched successfully")
-//     )
-// })
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "Unauthorized request");
+    }
 
+    try {
+        const decodedRefreshToken = await jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-// const refreshAccessToken = asyncHandler ( async (req, res) => {
-//     const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
-    
-//     if (!incomingRefreshToken) {
-//         throw new ApiError(
-//             401, "Unauthorized request"
-//         )
-//     }
+        if (!decodedRefreshToken) {
+            throw new ApiError(401, "Invalid Refresh Token");
+        }
 
-//     try {
-//         const decodedRefreshToken = await jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
-    
-//         if (!decodedRefreshToken) {
-//             throw new ApiError(
-//                 401,
-//                 "Invalid Refresh Token"
-//             )
-//         }
-    
-    
-//         const manager = Manager.findById(decodedRefreshToken.id).select("-password -refreshToken")
-    
-//         if (!manager) {
-//             throw new ApiError(401, "Invalid Refresh Token")
-//         }
-    
-//         if (incomingRefreshToken !== manager?.refreshToken) {
-//             throw new ApiError(400, "Refresh token is expired or used")
-//         }
+        const manager = await prisma.manager.findUnique({
+            where: { id: decodedRefreshToken.id },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                phone: true,
+                avatar: true,
+                refreshToken: true,
+            },
+        });
 
-//         const { accessToken, refreshToken } = await generateAccessAndRefreshToken(manager.id)
+        if (!manager) {
+            throw new ApiError(401, "Invalid Refresh Token");
+        }
 
-//         const options = {
-//             httpOnly: true,
-//             secure: true
-//         }
-    
-//         return res
-//         .status(200)
-//         .cookie("accessToken", accessToken, options)
-//         .cookie("refreshToken", refreshToken, options)
-//         .json(
-//             new ApiResponse(
-//                 200,
-//                 manager,
-//                 "Access Token refreshed successfully"
-//             )
-//         )
-    
-//     } catch (error) {
-//         throw new ApiError(401, error?.message || "Invalid refresh token")
-//     }
+        if (incomingRefreshToken !== manager.refreshToken) {
+            throw new ApiError(400, "Refresh token is expired or used");
+        }
 
-// })
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(manager.id);
 
+        const options = {
+            httpOnly: true,
+            secure: true,
+        };
 
-// export {
-//     loginManager,
-//     logoutManager,
-//     getManagerDetail,
-//     refreshAccessToken,
-// }
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(new ApiResponse(200, manager, "Access Token refreshed successfully"));
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid refresh token");
+    }
+});
+
+export {
+    loginManager,
+    logoutManager,
+    getManagerDetail,
+    refreshAccessToken,
+};
