@@ -53,7 +53,7 @@ const modelextensions = {
             },
             async comparePassword(args){
                 const context = Prisma.getExtensionContext(this);
-                const savedUser = await context.findUnique({where:args.data,});
+                const savedUser = await context.findUnique({where:{username: args.data.username},});
                 return await bcrypt.compare(args.data.password, savedUser.password);
             },
             async SignAccessToken(args) {
@@ -91,7 +91,7 @@ const modelextensions = {
             },
             async comparePassword(args){
                 const context = Prisma.getExtensionContext(this);
-                const savedUser = await context.findUnique({where:args.data,});
+                const savedUser = await context.findUnique({where:{username: args.data.username},});
                 return await bcrypt.compare(args.data.password, savedUser.password);
             },
             async SignAccessToken(args) {
@@ -129,7 +129,7 @@ const modelextensions = {
             },
             async comparePassword(args){
                 const context = Prisma.getExtensionContext(this);
-                const savedUser = await context.findUnique({where:args.data,});
+                const savedUser = await context.findUnique({where:{username: args.data.username},});
                 return await bcrypt.compare(args.data.password, savedUser.password);
             },
             async SignAccessToken(args) {

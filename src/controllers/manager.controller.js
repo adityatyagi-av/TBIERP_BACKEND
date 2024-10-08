@@ -2,7 +2,6 @@ import "dotenv/config";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import jwt from "jsonwebtoken";
 import { extendedclient as prisma } from "../models/prismaClient.js";
 
 const generateAccessAndRefreshToken = async (managerId) => {
@@ -10,17 +9,9 @@ const generateAccessAndRefreshToken = async (managerId) => {
         const manager = await prisma.manager.findUnique({
             where: { id: managerId },
         });
-
         if (!manager) throw new ApiError(404, "Manager not found");
-
-        const accessToken = manager.SignAccessToken();
-        const refreshToken = manager.SignRefreshToken();
-
-        await prisma.manager.update({
-            where: { id: managerId },
-            data: { refreshToken },
-        });
-
+        const accessToken = await prisma.manager.SignAccessToken({ where:{id: manager.id}, });
+        const refreshToken = await prisma.manager.SignRefreshToken({ where:{id: manager.id}, data:{}, });
         return { accessToken, refreshToken };
     } catch (error) {
         throw new ApiError(500, "Something went wrong while generating access and refresh tokens");
@@ -34,13 +25,16 @@ const loginManager = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Username and Password are required");
     }
 
-    const manager = await prisma.manager.findUnique({ where: { username } });
+    const manager = await prisma.manager.findUnique({ where: { username }, select: {
+        id: true,
+        username: true,
+    } });
 
     if (!manager) {
         throw new ApiError(400, "Invalid username and password");
     }
 
-    const isPasswordCorrect = await manager.comparePassword(password);
+    const isPasswordCorrect = await prisma.manager.comparePassword(password);
 
     if (!isPasswordCorrect) {
         throw new ApiError(400, "Invalid Password");
@@ -87,10 +81,14 @@ const logoutManager = asyncHandler(async (req, res) => {
         .status(200)
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-        .json(new ApiResponse(200, {}, "User logged out successfully"));
+        .json(new ApiResponse(200, {}, "Manager logged out successfully"));
 });
 
 const getManagerDetail = asyncHandler(async (req, res) => {
+    const manager = await prisma.manager.findUnique({
+        where: { id: req.user?.id }
+    });
+
     return res
         .status(200)
         .json(new ApiResponse(200, req.user, "Manager data fetched successfully"));
@@ -141,7 +139,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             .status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(200, manager, "Access Token refreshed successfully"));
+            .json(new ApiResponse(200, {accessToken, refreshToken}, "Access Token refreshed successfully"));
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token");
     }
