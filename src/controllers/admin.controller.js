@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Admin } from "../models/admin.model.js";
+import prisma from "../models/prismaClient.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -62,7 +62,6 @@ const loginAdmin = asyncHandler( async (req, res) => {
     )
 
 })
-
 
 
 const logoutAdmin = asyncHandler(async(req,res) =>{
@@ -165,5 +164,4 @@ export {
     logoutAdmin,
     refreshAccessToken,
     getAdminDetail,
-    
 }

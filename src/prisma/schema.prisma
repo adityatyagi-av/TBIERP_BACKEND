@@ -8,12 +8,12 @@ generator client {
 }
 
 model Registration {
-  id                 Int        @id @default(autoincrement())
+  id                 Int         @id @default(autoincrement())
   applicantName      String
-  scheme             Scheme     @relation(fields: [schemeId], references: [id])
+  scheme             Scheme      @relation(fields: [schemeId], references: [id])
   schemeId           Int
-  email              String     @unique @db.VarChar(255)
-  phone              String     @db.VarChar(10)  // No regex here, handle validation in application logic
+  email              String      @unique @db.VarChar(255)
+  phone              String      @db.VarChar(10)  // No regex here, handle validation in application logic
   postalAddress      String
   DOB                DateTime
   gender             Gender   // Enum for gender
@@ -31,20 +31,20 @@ model Registration {
   noBeneficiary      YesNo    // Enum for yes/no
   registerPEP        YesNo    // Enum for yes/no
   evaluation         Evaluation? @relation
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 }
 
 
 model Scheme {
-  id               Int          @id @default(autoincrement())
-  shemeName        String    
-  startups         Startup[]
-  registrations    Registration[]
-  programManager   Manager      @relation(fields:[programManagerId], references:[id])
+  id               Int            @id @default(autoincrement())
+  schemeName       String    
+  startups         Startup[]      @relation
+  registrations    Registration[] @relation
+  programManager   Manager        @relation(fields:[programManagerId], references:[id])
   programManagerId Int
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
 
@@ -53,18 +53,19 @@ model Founder {
   name           String
   username       String     @unique
   password       String
-  startups       Startup[]
+  startups       Startup[]  @relation
   email          String     @unique @db.VarChar(255)
   phone          String     @db.VarChar(10)
-  postalAddress  String
-  DOB            DateTime
+  postalAddress  String?
+  DOB            DateTime?
   gender         Gender
   category       Category
-  education      String
-  experience     String
-  resume         String
-  avatar         String
+  education      String?
+  experience     String?
+  resume         String?
+  avatar         String?
   refreshToken   String?
+  accessToken    String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 }
@@ -73,7 +74,7 @@ model Startup {
   id                 Int              @id @default(autoincrement())
   founder            Founder          @relation(fields:[founderId], references:[id])
   founderId          Int              
-  teamMembers        TeamMember[]
+  teamMembers        TeamMember[]     @relation
   scheme             Scheme           @relation(fields:[schemeId], references:[id])
   schemeId           Int
   ideaDescription    String
@@ -100,19 +101,20 @@ model TeamMember {
 }
 
 model Manager {
-  id           Int         @id @default(autoincrement())
-  username     String      @unique
+  id           Int          @id @default(autoincrement())
+  username     String       @unique
   managertype  ManagerType
   password     String 
-  email        String      @unique @db.VarChar(255)
+  email        String       @unique @db.VarChar(255)
   phone        String
-  scheme       Scheme[]
+  scheme       Scheme[]     @relation
   avatar       String
-  panelMember  PanelMember?
+  panelMember  PanelMember? @relation
   avatarId     Int?
   refreshToken String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  accessToken  String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model Evaluation {
@@ -129,7 +131,7 @@ model Evaluation {
 
 model Panel{
   id           Int           @id @default(autoincrement())
-  panelMembers PanelMember[] 
+  panelMembers PanelMember[] @relation
   evaluation   Evaluation?   @relation
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -151,7 +153,7 @@ model PanelMember{
 model EvaluationSheet{
   id              Int              @id @default(autoincrement())
   evaluation      Evaluation?      @relation
-  questions       Question[]
+  questions       Question[]       @relation
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -168,13 +170,13 @@ model Question{
 }
 
 model Guest{
-  id           Int         @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   name         String
-  email        String      @unique @db.VarChar(255)
-  panelMember  PanelMember?
-  phone        String      @db.VarChar(10)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  email        String       @unique @db.VarChar(255)
+  panelMember  PanelMember? @relation
+  phone        String       @db.VarChar(10)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 
