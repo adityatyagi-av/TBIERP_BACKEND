@@ -15,22 +15,18 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 
-// import routes
+// register routes
 import registerRouter from "./routes/registration.routes.js";
-
-
-
-// declare routes
 app.use("/api/v1", registerRouter);
 
 //admin routes
-// import adminRouter from "./routes/admin.routes.js"
-// app.use("/api/v1/admin", adminRouter);
+import adminRouter from "./routes/admin.routes.js"
+app.use("/api/v1/admin", adminRouter);
 
 
-// //manager routes
-// import managerRouter from "./routes/manager.routes.js"
-// app.use("/api/v1/manager", managerRouter)
+//manager routes
+import managerRouter from "./routes/manager.routes.js"
+app.use("/api/v1/manager", managerRouter)
 
 
 
