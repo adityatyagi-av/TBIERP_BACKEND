@@ -13,69 +13,67 @@ model Registration {
   scheme             Scheme      @relation(fields: [schemeId], references: [id])
   schemeId           Int
   email              String      @unique @db.VarChar(255)
-  phone              String      @db.VarChar(10)  // No regex here, handle validation in application logic
+  phone              String      @db.VarChar(10) // No regex here, handle validation in application logic
   postalAddress      String
   DOB                DateTime
-  gender             Gender   // Enum for gender
+  gender             Gender // Enum for gender
   category           Category // Enum for category
   education          String
   experience         String
-  resume             String   // S3 URL
+  resume             String // S3 URL
   ideaDescription    String
-  conceptNote        String   // S3 URL
-  aspectNote         String   // S3 URL
-  previousRecipient  YesNo    // Enum for yes/no
-  fullCommitment     YesNo    // Enum for yes/no
-  noOtherFellowship  YesNo    // Enum for yes/no
-  businessCommitment YesNo    // Enum for yes/no
-  noBeneficiary      YesNo    // Enum for yes/no
-  registerPEP        YesNo    // Enum for yes/no
+  conceptNote        String // S3 URL
+  aspectNote         String // S3 URL
+  previousRecipient  YesNo // Enum for yes/no
+  fullCommitment     YesNo // Enum for yes/no
+  noOtherFellowship  YesNo // Enum for yes/no
+  businessCommitment YesNo // Enum for yes/no
+  noBeneficiary      YesNo // Enum for yes/no
+  registerPEP        YesNo // Enum for yes/no
   evaluation         Evaluation? @relation
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 }
 
-
 model Scheme {
   id               Int            @id @default(autoincrement())
-  schemeName       String    
+  schemeName       String
   startups         Startup[]      @relation
   registrations    Registration[] @relation
-  programManager   Manager        @relation(fields:[programManagerId], references:[id])
-  programManagerId Int
+  programManager   Manager?       @relation(fields: [programManagerId], references: [id])
+  programManagerId Int?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
 
-
 model Founder {
-  id             Int        @id @default(autoincrement())
-  name           String
-  username       String     @unique
-  password       String
-  startups       Startup[]  @relation
-  email          String     @unique @db.VarChar(255)
-  phone          String     @db.VarChar(10)
-  postalAddress  String?
-  DOB            DateTime?
-  gender         Gender
-  category       Category
-  education      String?
-  experience     String?
-  resume         String?
-  avatar         String?
-  refreshToken   String?
-  accessToken    String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id            Int       @id @default(autoincrement())
+  name          String
+  username      String    @unique
+  password      String
+  startups      Startup[] @relation
+  email         String    @unique @db.VarChar(255)
+  phone         String    @db.VarChar(10)
+  postalAddress String?
+  DOB           DateTime?
+  gender        Gender
+  category      Category
+  education     String?
+  experience    String?
+  resume        String?
+  avatar        String?
+  refreshToken  String?
+  accessToken   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Startup {
-  id                 Int              @id @default(autoincrement())
-  founder            Founder          @relation(fields:[founderId], references:[id])
-  founderId          Int              
-  teamMembers        TeamMember[]     @relation
-  scheme             Scheme           @relation(fields:[schemeId], references:[id])
+  id                 Int          @id @default(autoincrement())
+  founder            Founder      @relation(fields: [founderId], references: [id])
+  founderId          Int
+  teamMembers        TeamMember[] @relation
+  scheme             Scheme       @relation(fields: [schemeId], references: [id])
   schemeId           Int
   ideaDescription    String
   conceptNote        String
@@ -86,25 +84,25 @@ model Startup {
   businessCommitment YesNo
   noBeneficiary      YesNo
   registerPEP        YesNo
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 }
 
 model TeamMember {
-  id          Int       @id @default(autoincrement())
-  memberName  String    
-  startup     Startup   @relation(fields:[startupId], references:[id])
+  id          Int      @id @default(autoincrement())
+  memberName  String
+  startup     Startup  @relation(fields: [startupId], references: [id])
   startupId   Int
-  memberEmail String    @unique @db.VarChar(255)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  memberEmail String   @unique @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Manager {
   id           Int          @id @default(autoincrement())
   username     String       @unique
   managertype  ManagerType
-  password     String 
+  password     String
   email        String       @unique @db.VarChar(255)
   phone        String
   scheme       Scheme[]     @relation
@@ -118,18 +116,18 @@ model Manager {
 }
 
 model Evaluation {
-  id                Int              @id @default(autoincrement())
-  registration      Registration     @relation(fields:[registrationId], references: [id])
-  registrationId    Int              @unique
-  panel             Panel            @relation(fields: [panelId], references: [id])
-  panelId           Int              @unique
-  evaluationSheet   EvaluationSheet  @relation(fields: [evaluationSheetId], references: [id])
-  evaluationSheetId Int              @unique
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id                Int             @id @default(autoincrement())
+  registration      Registration    @relation(fields: [registrationId], references: [id])
+  registrationId    Int             @unique
+  panel             Panel           @relation(fields: [panelId], references: [id])
+  panelId           Int             @unique
+  evaluationSheet   EvaluationSheet @relation(fields: [evaluationSheetId], references: [id])
+  evaluationSheetId Int             @unique
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 }
 
-model Panel{
+model Panel {
   id           Int           @id @default(autoincrement())
   panelMembers PanelMember[] @relation
   evaluation   Evaluation?   @relation
@@ -137,28 +135,28 @@ model Panel{
   updatedAt    DateTime      @updatedAt
 }
 
-model PanelMember{
-  id           Int         @id @default(autoincrement())
-  panel        Panel       @relation(fields:[panelId], references:[id])
-  panelId      Int
-  memberType   MemberType
-  manager      Manager?    @relation(fields: [managerId], references: [id])
-  managerId    Int?        @unique
-  guest        Guest?      @relation(fields: [guestId], references: [id])
-  guestId      Int?        @unique
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+model PanelMember {
+  id         Int        @id @default(autoincrement())
+  panel      Panel      @relation(fields: [panelId], references: [id])
+  panelId    Int
+  memberType MemberType
+  manager    Manager?   @relation(fields: [managerId], references: [id])
+  managerId  Int?       @unique
+  guest      Guest?     @relation(fields: [guestId], references: [id])
+  guestId    Int?       @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
-model EvaluationSheet{
-  id              Int              @id @default(autoincrement())
-  evaluation      Evaluation?      @relation
-  questions       Question[]       @relation
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+model EvaluationSheet {
+  id         Int         @id @default(autoincrement())
+  evaluation Evaluation? @relation
+  questions  Question[]  @relation
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
-model Question{
+model Question {
   id                Int             @id @default(autoincrement())
   questionText      String
   evaluatedMarks    String
@@ -169,16 +167,15 @@ model Question{
   updatedAt         DateTime        @updatedAt
 }
 
-model Guest{
-  id           Int          @id @default(autoincrement())
-  name         String
-  email        String       @unique @db.VarChar(255)
-  panelMember  PanelMember? @relation
-  phone        String       @db.VarChar(10)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+model Guest {
+  id          Int          @id @default(autoincrement())
+  name        String
+  email       String       @unique @db.VarChar(255)
+  panelMember PanelMember? @relation
+  phone       String       @db.VarChar(10)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
-
 
 enum ManagerType {
   program_manager
