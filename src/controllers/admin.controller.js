@@ -39,25 +39,39 @@ return res
 
 
 const loginAdmin = asyncHandler(async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password,email } = req.body;
 
-    if (!username || !password) {
+    if ((!username&&!email) || !password) {
         throw new ApiError(400, "Username and Password are required");
     }
 
-    const admin = await prisma.admin.findUnique({
-        where: { username },
-        select: {
-            id: true,
-            username: true,
-        }
-    });
+    let admin; 
+    if(email){
+        admin = await prisma.admin.findUnique({
+            where: { email},
+            select: {
+                id: true,
+                username: true,
+                email:true,
+            }
+        });
+    }
+    else{
+        admin = await prisma.admin.findUnique({
+            where: { username },
+            select: {
+                id: true,
+                username: true,
+                email:true,
+            }
+        });
+    }
 
     if (!admin) {
         throw new ApiError(400, "Invalid username or password");
     }
 
-    const isPasswordCorrect = await prisma.admin.comparePassword({ data: { username, password },}); 
+    const isPasswordCorrect = await prisma.admin.comparePassword({ data: { username:admin.username, password },}); 
 
     if (!isPasswordCorrect) {
         throw new ApiError(400, "Invalid Password");

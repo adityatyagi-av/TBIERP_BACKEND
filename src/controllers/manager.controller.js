@@ -32,22 +32,34 @@ const signupManger = asyncHandler(async (req,res)=>{
 })
 
 const loginManager = asyncHandler(async (req, res) => {
-    const { username, password } = req.body;
+    const { username,  password ,email } = req.body;
 
-    if (!username || !password) {
+    if ( (!email&&!username)|| !password) {
         throw new ApiError(400, "Username and Password are required");
     }
 
 
-    const manager = await prisma.manager.findUnique({ where: { username }, select: {
-        id: true,
-        username: true,
-    } });
+     let manager;
+     if(email){
+        manager = await prisma.manager.findUnique({ where: { email}, select: {
+            id: true,
+            email: true,
+            username:true,
+        } });
+     }else{
+        manager = await prisma.manager.findUnique({ where: {username}, select: {
+            id: true,
+            email: true,
+            username:true,
+        } });
+     }
     if (!manager) {
-        throw new ApiError(400, "Invalid username and password");
+        throw new ApiError(400, "Invalid email and password");
     }
+   
 
-    const isPasswordCorrect = await prisma.manager.comparePassword({ data: {username, password}});
+    const isPasswordCorrect = await prisma.manager.comparePassword({ data: {username:manager.username , password}});
+    
     if (!isPasswordCorrect) {
         throw new ApiError(400, "Invalid Password");
     }
