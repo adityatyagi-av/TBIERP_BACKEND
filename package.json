@@ -10,7 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config --experimental-json-modules src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "prepare": "husky install"
   },
   "author": "Aditya Tyagi",
   "license": "ISC",
@@ -32,6 +33,13 @@
     "prisma": "^5.20.0"
   },
   "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,css,md}": [
+      "prettier --write"
+    ]
   }
 }
