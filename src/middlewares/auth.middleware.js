@@ -21,25 +21,24 @@ const verifyJWT = asyncHandler( async (req, _, next) => {
 
         
 
-        const baseUrl = req.baseUrl;
-        
+        const baseUrl = req.baseUrl.toString();
         
 
-        if(baseUrl.contains("admin")){
+        if(baseUrl.includes("admin")){
             const id = decodedToken.id;
             const admin = await prisma.admin.findUnique({where:{id}, select:{id:true, username:true}})
             if (!admin) {
                 throw new ApiError(401, "Invalid access token")
             }
             req.user = admin;
-        } else if(baseUrl.contains("manager")){
+        } else if(baseUrl.includes("manager")){
             const id = decodedToken.id;
             const admin = await prisma.admin.findUnique({where:{id}, select:{id:true, username:true}})
             if (!manager) {
                 throw new ApiError(401, "Invalid access token")
             }
             req.user = manager;
-        } else if (baseUrl.contains("founder")){
+        } else if (baseUrl.includes("founder")){
             const id = decodedToken.id;
             const admin = await prisma.admin.findUnique({where:{id}, select:{id:true, username:true, managertype: true}})
             if (!admin) {

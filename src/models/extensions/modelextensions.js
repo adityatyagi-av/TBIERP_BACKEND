@@ -20,134 +20,193 @@ const modelextensions = {
         },
         registration: {
             async create(args){
-                const schemeName = args.data.scheme;
-                const existingScheme = await extendedclient.scheme.findUnique({
-                    where: { schemeName },
-                });
-                let scheme;
-                if (existingScheme) {
-                    scheme = { connect: { id: existingScheme.id } };
-                } else {
-                    scheme = await extendedclient.scheme.create({
-                      data: { schemeName },
+                try {
+                    const schemeName = args.data.scheme;
+                    const existingScheme = await extendedclient.scheme.findUnique({
+                        where: { schemeName },
                     });
-                    scheme = { connect: { id: scheme.id } };
+                    let scheme;
+                    if (existingScheme) {
+                        scheme = { connect: { id: existingScheme.id } };
+                    } else {
+                        scheme = await extendedclient.scheme.create({
+                          data: { schemeName },
+                        });
+                        scheme = { connect: { id: scheme.id } };
+                    }
+                    args.data.scheme = scheme;
+                    return await prisma.registration.create(args);
+                } catch (error) {
+                    console.log("Error:", error);
                 }
-                args.data.scheme = scheme;
-                return await prisma.registration.create(args);
             },
         },
         manager: {
             async create(args){
-                const context = Prisma.getExtensionContext(this);
-                const hashedPassword = await hashPassword(args.data.password);
-                args.data.password = hashedPassword;
-                return await context.create(args);
+                try {
+                    const hashedPassword = await hashPassword(args.data.password);
+                    args.data.password = hashedPassword;
+                    return await prisma.manager.create(args);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async update(args){
-                const context = Prisma.getExtensionContext(this);
-                if(!args.data.password)return await context.update(args);
-                const hashedPassword = await hashPassword(args.data.password);
-                args.data.password = hashedPassword;
-                return await context.update(args);
+                try {
+                    if(!args.data.password)return await prisma.update(args);
+                    const hashedPassword = await hashPassword(args.data.password);
+                    args.data.password = hashedPassword;
+                    return await prisma.manager.update(args);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async comparePassword(args){
-                const context = Prisma.getExtensionContext(this);
-                const savedUser = await context.findUnique({where:{username: args.data.username},});
-                return await bcrypt.compare(args.data.password, savedUser.password);
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const savedUser = await context.findUnique({where:{username: args.data.username},});
+                    return await bcrypt.compare(args.data.password, savedUser.password);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async SignAccessToken(args) {
-                const context = Prisma.getExtensionContext(this);
-                const manager = await context.findUnique({where: args.where, select:{id:true, username:true, managertype:true},});
-                const token = jwt.sign({ id: manager.id, username: manager.username, managertype:  manager.managertype}, process.env.ACCESS_TOKEN_SECRET || "", {
-                  expiresIn: "5m",
-                });
-                return token;
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const manager = await context.findUnique({where: args.where, select:{id:true, username:true, managertype:true},});
+                    const token = jwt.sign({ id: manager.id, username: manager.username, managertype:  manager.managertype}, process.env.ACCESS_TOKEN_SECRET || "", {
+                      expiresIn: "5m",
+                    });
+                    return token;
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async SignRefreshToken(args) {
-                const context = Prisma.getExtensionContext(this);
-                const manager = await context.findUnique({where: args.where, select:{id:true, username:true, managertype:true},});
-                const token = jwt.sign({ id: manager.id, username: manager.username, managertype:  manager.managertype}, process.env.ACCESS_TOKEN_SECRET || "", {
-                  expiresIn: "3d",
-                });
-                args.data.refreshToken = token;
-                await context.update(args);
-                return token;
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const manager = await context.findUnique({where: args.where, select:{id:true, username:true, managertype:true},});
+                    const token = jwt.sign({ id: manager.id, username: manager.username, managertype:  manager.managertype}, process.env.REFRESH_TOKEN_SECRET || "", {
+                      expiresIn: "3d",
+                    });
+                    args.data.refreshToken = token;
+                    await context.update(args);
+                    return token;
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
         },
         founder: {
             async create(args){
-                const context = Prisma.getExtensionContext(this);
-                const hashedPassword = await hashPassword(args.data.password);
-                args.data.password = hashedPassword;
-                return await context.create(args);
+                try {
+                    const hashedPassword = await hashPassword(args.data.password);
+                    args.data.password = hashedPassword;
+                    return await prisma.founder.create(args);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async update(args){
-                const context = Prisma.getExtensionContext(this);
-                if(!args.data.password)return await context.update(args);
-                const hashedPassword = await hashPassword(args.data.password);
-                args.data.password = hashedPassword;
-                return await context.update(args);
+                try {
+                    if(!args.data.password)return await prisma.update(args);
+                    const hashedPassword = await hashPassword(args.data.password);
+                    args.data.password = hashedPassword;
+                    return await prisma.founder.update(args);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async comparePassword(args){
-                const context = Prisma.getExtensionContext(this);
-                const savedUser = await context.findUnique({where:{username: args.data.username},});
-                return await bcrypt.compare(args.data.password, savedUser.password);
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const savedUser = await context.findUnique({where:{username: args.data.username},});
+                    return await bcrypt.compare(args.data.password, savedUser.password);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async SignAccessToken(args) {
-                const context = Prisma.getExtensionContext(this);
-                const founder = await context.findUnique({where:args.where,select:{id:true, username:true},})
-                const token = jwt.sign({ id: founder.id, username: founder.username}, process.env.ACCESS_TOKEN_SECRET || "", {
-                  expiresIn: "5m",
-                });
-                return token;
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const founder = await context.findUnique({where:args.where,select:{id:true, username:true},})
+                    const token = jwt.sign({ id: founder.id, username: founder.username}, process.env.ACCESS_TOKEN_SECRET || "", {
+                      expiresIn: "5m",
+                    });
+                    return token;
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async SignRefreshToken(args) {
-                const context = Prisma.getExtensionContext(this);
-                const founder = await context.findUnique({where:args.where,select:{id:true, username:true},})
-                const token = jwt.sign({ id: founder.id, username: founder.username}, process.env.ACCESS_TOKEN_SECRET || "", {
-                  expiresIn: "3d",
-                });
-                args.data.refreshToken = token;
-                await context.update(args);
-                return token;
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const founder = await context.findUnique({where:args.where,select:{id:true, username:true},})
+                    const token = jwt.sign({ id: founder.id, username: founder.username}, process.env.REFRESH_TOKEN_SECRET || "", {
+                      expiresIn: "3d",
+                    });
+                    args.data.refreshToken = token;
+                    await context.update(args);
+                    return token;
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
         },
         admin: {
             async create(args){
-                const hashedPassword = await hashPassword(args.data.password);
-                args.data.password = hashedPassword;
-                return await prisma.admin.create(args);
+                try {
+                    const hashedPassword = await hashPassword(args.data.password);
+                    args.data.password = hashedPassword;
+                    return await prisma.admin.create(args);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async update(args){
-                const context = Prisma.getExtensionContext(this);
-                if(!args.data.password)return await context.update(args);
-                const hashedPassword = await hashPassword(args.data.password);
-                args.data.password = hashedPassword;
-                return await context.update(args);
+                try {
+                    if(!args.data.password)return await prisma.admin.update(args);
+                    const hashedPassword = await hashPassword(args.data.password);
+                    args.data.password = hashedPassword;
+                    return await prisma.admin.update(args);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async comparePassword(args){
-                const context = Prisma.getExtensionContext(this);
-                const savedUser = await context.findUnique({where:{username: args.data.username},});
-                return await bcrypt.compare(args.data.password, savedUser.password);
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const savedUser = await context.findUnique({where:{username: args.data.username},});
+                    return await bcrypt.compare(args.data.password, savedUser.password);
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async SignAccessToken(args) {
-                const context = Prisma.getExtensionContext(this);
-                const admin = await context.findUnique({where:args.where,select:{id:true, username:true},})
-                const token = jwt.sign({ id: admin.id, username: admin.username}, process.env.ACCESS_TOKEN_SECRET || "", {
-                  expiresIn: "5m",
-                });
-                return token;
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const admin = await context.findUnique({where:args.where,select:{id:true, username:true},})
+                    const token = jwt.sign({ id: admin.id, username: admin.username}, process.env.ACCESS_TOKEN_SECRET || "", {
+                      expiresIn: "5m",
+                    });
+                    return token;
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
             async SignRefreshToken(args) {
-                const context = Prisma.getExtensionContext(this);
-                const admin = await context.findUnique({where:args.where,select:{id:true, username:true},})
-                const token = jwt.sign({ id: admin.id, username: admin.username}, process.env.ACCESS_TOKEN_SECRET || "", {
-                  expiresIn: "3d",
-                });
-                args.data.refreshToken = token;
-                await context.update(args);
-                return token;
+                try {
+                    const context = Prisma.getExtensionContext(this);
+                    const admin = await context.findUnique({where:args.where,select:{id:true, username:true},});
+                    const token = jwt.sign({ id: admin.id, username: admin.username}, process.env.REFRESH_TOKEN_SECRET || "", {
+                      expiresIn: "3d",
+                    });
+                    args.data.refreshToken = token;
+                    await context.update(args);
+                    return token;
+                } catch (error) {
+                    console.log("Error:", error);
+                }
             },
         },
     }

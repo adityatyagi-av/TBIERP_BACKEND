@@ -8,16 +8,22 @@ import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (adminId) => {
     try {
+        console.log("step1");
         const admin = await prisma.admin.findUnique({
             where: { id: adminId },
         });
+        console.log("step2");
 
         if (!admin) {
             throw new ApiError(404, "Admin not found");
         }
+        console.log("step3");
 
-        const accessToken = await prisma.admin.SignAccessToken({ where: { id: admin.id}, }); 
+        const accessToken = await prisma.admin.SignAccessToken({ where: { id: admin.id}, });
+        console.log("step4"); 
         const refreshToken = await prisma.admin.SignRefreshToken({ where: { id: admin.id}, data: {}, }); 
+
+        console.log("step5");
 
         return { accessToken, refreshToken };
     } catch (error) {
@@ -27,11 +33,9 @@ const generateAccessAndRefreshToken = async (adminId) => {
 
 const signupAdmin = asyncHandler(async(req,res) =>{
   const {username , email , password} =  await req.body;
-  console.log("iNSIDE");
   if (!username || !password ||!email) {
     throw new ApiError(400, "Username and Password   and Email are required");
 }
-console.log("sdjj");
 const newAdmin = await prisma.admin.create({data:{username , email ,password}});
 console.log(newAdmin);
 return res
@@ -69,7 +73,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
 
     const loggedInAdmin = await prisma.admin.findUnique({
         where: { id: admin.id },
-        select: { id: true, name: true, username: true, email: true }, 
+        select: { id: true, username: true, email: true }, 
     });
 
     const options = {
@@ -117,11 +121,9 @@ const getAdminDetail = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
-
-    if (!incomingRefreshToken) {
+    if (!incomingRefreshToken ||!process.env.REFRESH_TOKEN_SECRET) {
         throw new ApiError(401, "Unauthorized request");
     }
-
     try {
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
 
@@ -136,28 +138,24 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
                 refreshToken: true,
             }
         });
-
         if (!admin) {
             throw new ApiError(401, "Invalid refresh token");
         }
-
         if (incomingRefreshToken !== admin.refreshToken) {
             throw new ApiError(401, "Refresh token is expired or used");
         }
-
         const { accessToken, refreshToken } = await generateAccessAndRefreshToken(admin.id);
-
         const options = {
             httpOnly: true,
             secure: true,
         };
-
         return res
             .status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
             .json(new ApiResponse(200, { accessToken, refreshToken }, "Access token refreshed successfully"));
     } catch (error) {
+        console.log(error);
         throw new ApiError(401, error?.message || "Invalid refresh token");
     }
 });

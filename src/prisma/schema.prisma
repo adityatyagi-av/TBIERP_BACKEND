@@ -11,6 +11,7 @@ model Admin {
   id           Int      @id @default(autoincrement())
   username     String   @unique
   email        String   @unique @db.VarChar(255)
+  phone        String?  @db.VarChar(10)
   password     String
   avatar       String?
   refreshToken String?
@@ -20,27 +21,27 @@ model Admin {
 
 model Registration {
   id                 Int         @id @default(autoincrement())
-  applicantName      String
-  scheme             Scheme      @relation(fields: [schemeId], references: [id])
-  schemeId           Int
-  email              String      @unique @db.VarChar(255)
-  phone              String      @db.VarChar(10) // No regex here, handle validation in application logic
-  postalAddress      String
-  DOB                DateTime
-  gender             Gender // Enum for gender
-  category           Category // Enum for category
-  education          String
-  experience         String
-  resume             String // S3 URL
-  ideaDescription    String
-  conceptNote        String // S3 URL
-  aspectNote         String // S3 URL
-  previousRecipient  YesNo // Enum for yes/no
-  fullCommitment     YesNo // Enum for yes/no
-  noOtherFellowship  YesNo // Enum for yes/no
-  businessCommitment YesNo // Enum for yes/no
-  noBeneficiary      YesNo // Enum for yes/no
-  registerPEP        YesNo // Enum for yes/no
+  applicantName      String?
+  scheme             Scheme?      @relation(fields: [schemeId], references: [id])
+  schemeId           Int?
+  email              String?      @unique @db.VarChar(255)
+  phone              String?      @db.VarChar(10) // No regex here, handle validation in application logic
+  postalAddress      String?
+  DOB                DateTime?
+  gender             Gender? // Enum for gender
+  category           Category? // Enum for category
+  education          String?
+  experience         String?
+  resume             String? // S3 URL
+  ideaDescription    String?
+  conceptNote        String? // S3 URL
+  aspectNote         String? // S3 URL
+  previousRecipient  YesNo? // Enum for yes/no
+  fullCommitment     YesNo? // Enum for yes/no
+  noOtherFellowship  YesNo? // Enum for yes/no
+  businessCommitment YesNo? // Enum for yes/no
+  noBeneficiary      YesNo? // Enum for yes/no
+  registerPEP        YesNo? // Enum for yes/no
   evaluation         Evaluation? @relation
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
@@ -67,8 +68,8 @@ model Founder {
   phone         String    @db.VarChar(10)
   postalAddress String?
   DOB           DateTime?
-  gender        Gender
-  category      Category
+  gender        Gender?
+  category      Category?
   education     String?
   experience    String?
   resume        String?
@@ -114,9 +115,9 @@ model Manager {
   managertype  ManagerType
   password     String
   email        String       @unique @db.VarChar(255)
-  phone        String
+  phone        String       @db.VarChar(10)
   scheme       Scheme[]     @relation
-  avatar       String
+  avatar       String?
   panelMember  PanelMember? @relation
   avatarId     Int?
   refreshToken String?
