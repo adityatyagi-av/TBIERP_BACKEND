@@ -25,6 +25,20 @@ const generateAccessAndRefreshToken = async (adminId) => {
     }
 };
 
+const signupAdmin = asyncHandler(async(req,res) =>{
+  const {username , email , password} =  await req.body;
+  console.log("iNSIDE");
+  if (!username || !password ||!email) {
+    throw new ApiError(400, "Username and Password   and Email are required");
+}
+console.log("sdjj");
+const newAdmin = await prisma.admin.create({data:{username , email ,password}});
+console.log(newAdmin);
+return res
+.status(200)
+.json(new ApiResponse(200,  newAdmin , "Admin successfully created."));
+})
+
 
 const loginAdmin = asyncHandler(async (req, res) => {
     const { username, password } = req.body;
@@ -150,6 +164,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 
 export {
+    signupAdmin,
     loginAdmin,
     logoutAdmin,
     refreshAccessToken,

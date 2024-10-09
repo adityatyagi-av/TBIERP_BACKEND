@@ -115,10 +115,9 @@ const modelextensions = {
         },
         admin: {
             async create(args){
-                const context = Prisma.getExtensionContext(this);
                 const hashedPassword = await hashPassword(args.data.password);
                 args.data.password = hashedPassword;
-                return await context.create(args);
+                return await prisma.admin.create(args);
             },
             async update(args){
                 const context = Prisma.getExtensionContext(this);

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import{
+    signupAdmin,
     loginAdmin ,
     logoutAdmin,
     refreshAccessToken,
@@ -11,6 +12,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 
 const adminRouter = Router();
+adminRouter.route("/signup").post(signupAdmin);
 adminRouter.route("/login").post(loginAdmin);
 adminRouter.route("/logout").get(verifyJWT, logoutAdmin);
 adminRouter.route("/refresh-accessToken").get(refreshAccessToken);
