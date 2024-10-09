@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { extendedclient as prisma } from "../models/prismaClient.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (managerId) => {
     try {
@@ -18,6 +19,18 @@ const generateAccessAndRefreshToken = async (managerId) => {
     }
 };
 
+const signupManger = asyncHandler(async (req,res)=>{
+    const { username , password , email , type , managertype} = await req.body;
+    if (!username || !password ||!email ||!managertype) {
+        throw new ApiError(400, "Username and Password   and Email are required");
+    }
+    const newManager = await prisma.manager.create({data:{username , email ,password , managertype}});
+    console.log(newManager);
+    return res
+    .status(200)
+    .json(new ApiResponse(200,  newManager , "Manager successfully created."));
+})
+
 const loginManager = asyncHandler(async (req, res) => {
     const { username, password } = req.body;
 
@@ -25,23 +38,21 @@ const loginManager = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Username and Password are required");
     }
 
+
     const manager = await prisma.manager.findUnique({ where: { username }, select: {
         id: true,
         username: true,
     } });
-
     if (!manager) {
         throw new ApiError(400, "Invalid username and password");
     }
 
-    const isPasswordCorrect = await prisma.manager.comparePassword(password);
-
+    const isPasswordCorrect = await prisma.manager.comparePassword({ data: {username, password}});
     if (!isPasswordCorrect) {
         throw new ApiError(400, "Invalid Password");
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(manager.id);
-
     const loggedInManager = await prisma.manager.findUnique({
         where: { id: manager.id },
         select: {
@@ -91,7 +102,7 @@ const getManagerDetail = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, req.user, "Manager data fetched successfully"));
+        .json(new ApiResponse(200, manager, "Manager data fetched successfully"));
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
@@ -146,6 +157,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 export {
+    signupManger,
     loginManager,
     logoutManager,
     getManagerDetail,

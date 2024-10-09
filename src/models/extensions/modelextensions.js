@@ -53,7 +53,7 @@ const modelextensions = {
             },
             async update(args){
                 try {
-                    if(!args.data.password)return await prisma.update(args);
+                    if(!args.data.password)return await prisma.manager.update(args);
                     const hashedPassword = await hashPassword(args.data.password);
                     args.data.password = hashedPassword;
                     return await prisma.manager.update(args);
@@ -109,7 +109,7 @@ const modelextensions = {
             },
             async update(args){
                 try {
-                    if(!args.data.password)return await prisma.update(args);
+                    if(!args.data.password)return await prisma.founder.update(args);
                     const hashedPassword = await hashPassword(args.data.password);
                     args.data.password = hashedPassword;
                     return await prisma.founder.update(args);

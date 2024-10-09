@@ -115,7 +115,7 @@ model Manager {
   managertype  ManagerType
   password     String
   email        String       @unique @db.VarChar(255)
-  phone        String       @db.VarChar(10)
+  phone        String?       @db.VarChar(10)
   scheme       Scheme[]     @relation
   avatar       String?
   panelMember  PanelMember? @relation
