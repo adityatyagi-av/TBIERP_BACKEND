@@ -2,3 +2,4 @@
 /.env
 node_modules
 /src/prisma/migrations
+/package-lock.json
