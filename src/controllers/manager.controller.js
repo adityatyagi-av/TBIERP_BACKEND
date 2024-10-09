@@ -54,6 +54,7 @@ const loginManager = asyncHandler(async (req, res) => {
         } });
      }
     if (!manager) {
+       
         throw new ApiError(400, "Invalid email and password");
     }
    
