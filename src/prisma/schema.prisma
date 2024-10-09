@@ -22,10 +22,10 @@ model Admin {
 model Registration {
   id                 Int         @id @default(autoincrement())
   applicantName      String?
-  scheme             Scheme?      @relation(fields: [schemeId], references: [id])
+  scheme             Scheme?     @relation(fields: [schemeId], references: [id])
   schemeId           Int?
-  email              String?      @unique @db.VarChar(255)
-  phone              String?      @db.VarChar(10) // No regex here, handle validation in application logic
+  email              String?     @unique @db.VarChar(255)
+  phone              String?     @db.VarChar(10) // No regex here, handle validation in application logic
   postalAddress      String?
   DOB                DateTime?
   gender             Gender? // Enum for gender
@@ -48,14 +48,26 @@ model Registration {
 }
 
 model Scheme {
-  id               Int            @id @default(autoincrement())
-  schemeName       String         @unique
-  startups         Startup[]      @relation
-  registrations    Registration[] @relation
-  programManager   Manager?       @relation(fields: [programManagerId], references: [id])
+  id               Int              @id @default(autoincrement())
+  schemeName       String           @unique
+  startups         Startup[]        @relation
+  registrations    Registration[]   @relation
+  programManager   Manager?         @relation(fields: [programManagerId], references: [id])
   programManagerId Int?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  questions        SchemeQuestion[] @relation("SchemeQuestionRelation")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model SchemeQuestion {
+  id           Int                 @id @default(autoincrement())
+  name         String?
+  type         SchemeQuestionType?
+  questionText String?
+  options      String[]
+  schemes      Scheme[]            @relation("SchemeQuestionRelation")
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 }
 
 model Founder {
@@ -115,7 +127,7 @@ model Manager {
   managertype  ManagerType
   password     String
   email        String       @unique @db.VarChar(255)
-  phone        String?       @db.VarChar(10)
+  phone        String?      @db.VarChar(10)
   scheme       Scheme[]     @relation
   avatar       String?
   panelMember  PanelMember? @relation
@@ -214,4 +226,12 @@ enum YesNo {
 enum MemberType {
   Manager
   Guest
+}
+
+enum SchemeQuestionType {
+  smcq
+  mmcq
+  text
+  link
+  boolean
 }
