@@ -8,22 +8,16 @@ import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (adminId) => {
     try {
-        console.log("step1");
         const admin = await prisma.admin.findUnique({
             where: { id: adminId },
         });
-        console.log("step2");
 
         if (!admin) {
             throw new ApiError(404, "Admin not found");
         }
-        console.log("step3");
 
         const accessToken = await prisma.admin.SignAccessToken({ where: { id: admin.id}, });
-        console.log("step4"); 
-        const refreshToken = await prisma.admin.SignRefreshToken({ where: { id: admin.id}, data: {}, }); 
-
-        console.log("step5");
+        const refreshToken = await prisma.admin.SignRefreshToken({ where: { id: admin.id}, data: {}, });
 
         return { accessToken, refreshToken };
     } catch (error) {
