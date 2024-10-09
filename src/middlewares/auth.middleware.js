@@ -1,4 +1,4 @@
-import prisma from "../models/prismaClient.js"
+import {extendedclient as prisma} from "../models/prismaClient.js"
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
