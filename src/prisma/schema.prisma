@@ -20,31 +20,26 @@ model Admin {
 }
 
 model Registration {
-  id                 Int         @id @default(autoincrement())
-  applicantName      String?
-  scheme             Scheme?     @relation(fields: [schemeId], references: [id])
-  schemeId           Int?
-  email              String?     @unique @db.VarChar(255)
-  phone              String?     @db.VarChar(10) // No regex here, handle validation in application logic
-  postalAddress      String?
-  DOB                DateTime?
-  gender             Gender? // Enum for gender
-  category           Category? // Enum for category
-  education          String?
-  experience         String?
-  resume             String? // S3 URL
-  ideaDescription    String?
-  conceptNote        String? // S3 URL
-  aspectNote         String? // S3 URL
-  previousRecipient  YesNo? // Enum for yes/no
-  fullCommitment     YesNo? // Enum for yes/no
-  noOtherFellowship  YesNo? // Enum for yes/no
-  businessCommitment YesNo? // Enum for yes/no
-  noBeneficiary      YesNo? // Enum for yes/no
-  registerPEP        YesNo? // Enum for yes/no
-  evaluation         Evaluation? @relation
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  id                    Int                    @id @default(autoincrement())
+  applicantName         String?
+  scheme                Scheme?                @relation(fields: [schemeId], references: [id])
+  schemeId              Int?
+  email                 String?                @unique @db.VarChar(255)
+  phone                 String?                @db.VarChar(10) // No regex here, handle validation in application logic
+  postalAddress         String?
+  DOB                   DateTime?
+  gender                Gender? // Enum for gender
+  category              Category? // Enum for category
+  education             String?
+  experience            String?
+  resume                String? // S3 URL
+  ideaDescription       String?
+  conceptNote           String? // S3 URL
+  aspectNote            String? // S3 URL
+  schemeSpecificAnswers SchemeQuestionAnswer[] @relation
+  evaluation            Evaluation?            @relation
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 }
 
 model Scheme {
@@ -60,14 +55,26 @@ model Scheme {
 }
 
 model SchemeQuestion {
-  id           Int                 @id @default(autoincrement())
+  id           Int                    @id @default(autoincrement())
   name         String?
   type         SchemeQuestionType?
   questionText String?
   options      String[]
-  schemes      Scheme[]            @relation("SchemeQuestionRelation")
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  schemes      Scheme[]               @relation("SchemeQuestionRelation")
+  answers      SchemeQuestionAnswer[] @relation
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+}
+
+model SchemeQuestionAnswer {
+  id               Int             @id @default(autoincrement())
+  question         SchemeQuestion? @relation(fields: [schemeQuestionId], references: [id])
+  schemeQuestionId Int?
+  answer           String?
+  registration     Registration?   @relation(fields: [registrationId], references: [id])
+  registrationId   Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model Founder {
